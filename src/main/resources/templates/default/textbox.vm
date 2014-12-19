@@ -1,0 +1,1 @@
+<input type="text" id="$id" class="$class"#if($text) value="$text"#end/>

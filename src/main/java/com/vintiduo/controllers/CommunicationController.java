@@ -1,54 +1,41 @@
 package com.vintiduo.controllers;
 
 import com.vintiduo.PageSessionHandler;
+import com.vintiduo.WebSocketConfig;
 import com.vintiduo.data.WebSocketRequest;
-import com.vintiduo.data.WebSocketResponse;
-import com.vintiduo.page.Page;
 import com.vintiduo.test.HomePage;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
 
-import java.security.Principal;
+import javax.servlet.http.HttpSession;
 import java.util.Map;
 
-/**
- * Created by kostas on 2014.12.17.
- */
 @Controller
-public class CommunicationController implements ApplicationContextAware {
-
-    ApplicationContext context;
+public class CommunicationController {
 
     @Autowired
     PageSessionHandler pageSessionHandler;
 
     @MessageMapping("/communication")
-    public void communication(Message<Object> message, @Header("simpSessionId") String sessionId, WebSocketRequest request) {
-        pageSessionHandler.handleRequest(sessionId, request, message.getHeaders());
+    public void communication(WebSocketRequest request, @Headers MessageHeaders headers,
+                              @Header("simpSessionAttributes") Map<String, String> sessionAttributes, @Header("simpSessionId") String simpSessionId) {
+        String sessionId = sessionAttributes.get(HttpSessionHandshakeInterceptor.HTTP_SESSION_ID_ATTR_NAME);
+        pageSessionHandler.handleWebSocketRequest(sessionId, simpSessionId, request, headers);
     }
 
-    private HomePage page = new HomePage();
-
-    @RequestMapping("/home")
+    @RequestMapping("/{page}")
     @ResponseBody
-    public String home() {
-        return page.toString();
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.context = applicationContext;
+    public String index(@PathVariable("page") String page, HttpSession session) {
+        return pageSessionHandler.handleHttpRequest(page, session.getId());
     }
 }

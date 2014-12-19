@@ -1,15 +1,13 @@
 package com.vintiduo.data;
 
-import java.io.Serializable;
+import java.util.Map;
 
-/**
- * Created by kostas on 2014.12.18.
- */
 public class Event {
 
     private String source;
     private String type;
-    private String data;
+    private Map<String, String> data;
+    private String path;
 
     public String getType() {
         return type;
@@ -19,7 +17,21 @@ public class Event {
         return source;
     }
 
-    public String getData() {
+    public Map<String, String> getData() {
         return data;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    @Override
+    public String toString() {
+        return "Event{" +
+                "source='" + source + '\'' +
+                ", type='" + type + '\'' +
+                ", data=" + data +
+                ", path='" + path + '\'' +
+                '}';
     }
 }

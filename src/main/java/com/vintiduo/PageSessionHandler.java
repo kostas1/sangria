@@ -2,8 +2,10 @@ package com.vintiduo;
 
 import com.vintiduo.data.WebSocketRequest;
 import com.vintiduo.data.WebSocketResponse;
-import com.vintiduo.page.Component;
-import com.vintiduo.page.Page;
+import com.vintiduo.page.FrameworkContext;
+import com.vintiduo.page.TemplateContextBuilder;
+import com.vintiduo.page.components.Element;
+import com.vintiduo.page.components.Page;
 import com.vintiduo.page.Refreshable;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,21 +24,31 @@ import java.util.Map;
 public class PageSessionHandler implements ApplicationContextAware, Refreshable {
 
     @Autowired
+    TemplateContextBuilder templateContextBuilder;
+
+    @Autowired
     SimpMessagingTemplate brokerMessagingTemplate;
 
     ApplicationContext context;
     Map<String, Map<String, Page>> sessions = new HashMap<>();
 
-    public void handleRequest(String sessionId, WebSocketRequest request, MessageHeaders headers) {
-        Map<String, Page> pages = sessions.getOrDefault(sessionId, new HashMap<String, Page>());
-        Page page = pages.getOrDefault(request.getPage(), context.getBean(request.getPage(), Page.class));
-        page.setSessionId(sessionId);
-        page.setHeaders(headers);
-        page.setRefreshHandler(this);
+    public void handleWebSocketRequest(String sessionId, String simpSessionId, WebSocketRequest request, MessageHeaders headers) {
+        Page page = getPageForHttpSessionIdAndName(sessionId, request.getPage());
+        if (!page.getFrameworkContext().isComplete()) {
+            page.setFrameworkContext(new FrameworkContext(simpSessionId, sessionId, headers, this, templateContextBuilder));
+        }
         page.handleEvent(request.getEvent());
+    }
 
-        pages.put(request.getPage(), page);
+    private Page getPageForHttpSessionIdAndName(String sessionId, String name) {
+        Map<String, Page> pages = sessions.getOrDefault(sessionId, new HashMap<String, Page>());
+        Page page = pages.getOrDefault(name, context.getBean(name, Page.class));
+        if (page.getFrameworkContext() == null) {
+            page.setFrameworkContext(new FrameworkContext(null, sessionId, null, this, templateContextBuilder));
+        }
+        pages.put(name, page);
         sessions.put(sessionId, pages);
+        return page;
     }
 
     @Override
@@ -45,10 +57,14 @@ public class PageSessionHandler implements ApplicationContextAware, Refreshable 
     }
 
     @Override
-    public void refresh(String sessionId, MessageHeaders headers, Component component) {
+    public void refresh(String sessionId, MessageHeaders headers, Element element) {
         WebSocketResponse response = new WebSocketResponse();
-        response.setId(component.getId());
-        response.setData(component.toString());
+        response.setId(element.getId());
+        response.setData(element.toString());
         brokerMessagingTemplate.convertAndSendToUser(sessionId, "/topic/communication", response, headers);
+    }
+
+    public String handleHttpRequest(String page, String sessionId) {
+        return getPageForHttpSessionIdAndName(sessionId, page).toString();
     }
 }

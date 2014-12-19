@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hello WebSocket</title>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/sockjs-client/0.3.4/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script type="text/javascript">
+        var stompClient = null;
+
+
+        function connect() {
+            var socket = new SockJS('/communication');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function(frame) {
+                console.log('Connected: ' + frame);
+                stompClient.subscribe('/user/topic/communication', function(response){
+                    console.log(response);
+                    response = JSON.parse(response.body);
+                    $("#" + response.id).replaceWith(response.data);
+                    bindClick();
+                    bindTableCellClick();
+                });
+            });
+        }
+
+        function disconnect() {
+            stompClient.disconnect();
+            console.log("Disconnected");
+        }
+
+        function getPath(element) {
+            return  $(element)
+                    .parentsUntil('body')
+                    .andSelf()
+                    .map(function() {
+                        return this.nodeName + ':eq(' + $(element).index() + ')';
+                    }).get().join('>');
+        }
+
+        function bindClick() {
+            $(".component").unbind("click");
+            $(".component").click(function() {
+                stompClient.send("/app/communication", {}, JSON.stringify({ "page": "homePage", "event": { "source": $(this).attr("id"), "path": getPath(this), "type": "click", "data": {} } }));
+                return false;
+            });
+        }
+
+        function bindTableCellClick() {
+            $(".component.table tr td").unbind("click");
+            $('.component.table tr td').click(function(){
+                var col = $(this).parent().children().index($(this));
+                var row = $(this).parent().parent().children().index($(this).parent());
+                stompClient.send("/app/communication", {}, JSON.stringify({ "page": "homePage", "event": { "source": $(this).closest("table.component.table").attr("id"), "path": getPath(this), "type": "click", "data": { "column": col, "row": row }}}));
+                return false;
+            });
+        }
+
+        $(function() {
+            connect();
+            bindClick();
+            bindTableCellClick();
+        });
+    </script>
+</head>
+<body>
+<noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being enabled. Please enable
+    Javascript and reload this page!</h2></noscript>
+<div>
+
+    $layout
+</div>
+</body>
+</html>
