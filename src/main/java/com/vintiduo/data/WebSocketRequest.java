@@ -1,15 +1,18 @@
 package com.vintiduo.data;
 
-import java.io.Serializable;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.DateSerializer;
 
-/**
- * Created by kostas on 2014.12.18.
- */
+import java.util.Date;
+
 public class WebSocketRequest {
 
     private String page;
 
     private Event event;
+
+    @JsonSerialize(using = DateSerializer.class)
+    private Date created;
 
     public Event getEvent() {
         return event;
@@ -17,5 +20,14 @@ public class WebSocketRequest {
 
     public String getPage() {
         return page;
+    }
+
+    @Override
+    public String toString() {
+        return "WebSocketRequest{" +
+                "page='" + page + '\'' +
+                ", event=" + event +
+                ", created=" + created +
+                '}';
     }
 }

@@ -41,7 +41,7 @@
         function bindClick() {
             $(".component").unbind("click");
             $(".component").click(function() {
-                stompClient.send("/app/communication", {}, JSON.stringify({ "page": "homePage", "event": { "source": $(this).attr("id"), "path": getPath(this), "type": "click", "data": {} } }));
+                stompClient.send("/app/communication", {}, JSON.stringify({ "page": "homePage", "created": new Date().getTime(), "event": { "source": $(this).attr("id"), "path": getPath(this), "type": "click", "data": {} } }));
                 return false;
             });
         }
@@ -51,7 +51,7 @@
             $('.component.table tr td').click(function(){
                 var col = $(this).parent().children().index($(this));
                 var row = $(this).parent().parent().children().index($(this).parent());
-                stompClient.send("/app/communication", {}, JSON.stringify({ "page": "homePage", "event": { "source": $(this).closest("table.component.table").attr("id"), "path": getPath(this), "type": "click", "data": { "column": col, "row": row }}}));
+                stompClient.send("/app/communication", {}, JSON.stringify({ "page": "homePage", "created": new Date().toUTCString(), "event": { "source": $(this).closest("table.component.table").attr("id"), "path": getPath(this), "type": "click", "data": { "column": col, "row": row }}}));
                 return false;
             });
         }

@@ -14,6 +14,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,6 +34,7 @@ public class PageSessionHandler implements ApplicationContextAware, Refreshable 
     Map<String, Map<String, Page>> sessions = new HashMap<>();
 
     public void handleWebSocketRequest(String sessionId, String simpSessionId, WebSocketRequest request, MessageHeaders headers) {
+        System.out.println(request);
         Page page = getPageForHttpSessionIdAndName(sessionId, request.getPage());
         if (!page.getFrameworkContext().isComplete()) {
             page.setFrameworkContext(new FrameworkContext(simpSessionId, sessionId, headers, this, templateContextBuilder));
@@ -61,6 +63,7 @@ public class PageSessionHandler implements ApplicationContextAware, Refreshable 
         WebSocketResponse response = new WebSocketResponse();
         response.setId(element.getId());
         response.setData(element.toString());
+        response.setProcessed(new Date());
         brokerMessagingTemplate.convertAndSendToUser(sessionId, "/topic/communication", response, headers);
     }
 
