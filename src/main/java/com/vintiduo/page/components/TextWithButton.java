@@ -1,13 +1,14 @@
 package com.vintiduo.page.components;
 
 import com.vintiduo.page.ComponentData;
+import com.vintiduo.page.components.form.TextField;
 
 public class TextWithButton extends Element {
 
     public TextWithButton() {
 
-        addComponent(new TextBox());
-        addComponent(new Button("click"));
+        addElement(new TextField());
+        addElement(new Button("click"));
     }
 
     @Override

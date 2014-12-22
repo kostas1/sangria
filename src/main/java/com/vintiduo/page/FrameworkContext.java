@@ -3,9 +3,6 @@ package com.vintiduo.page;
 import com.vintiduo.page.components.Element;
 import org.springframework.messaging.MessageHeaders;
 
-/**
- * Created by kostas on 2014.12.19.
- */
 public class FrameworkContext {
     private String simpSessionId;
     private String httpSessionId;
@@ -37,5 +34,9 @@ public class FrameworkContext {
                 && refreshHandler != null
                 && headers != null
                 && templateContextBuilder != null;
+    }
+
+    public void setSimpSessionId(String simpSessionId) {
+        this.simpSessionId = simpSessionId;
     }
 }

@@ -16,6 +16,6 @@ public class Layout extends Element {
     }
 
     public void addElement(Element element) {
-        addComponent(element);
+        super.addElement(element);
     }
 }

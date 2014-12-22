@@ -1,14 +1,17 @@
 package com.vintiduo.page.components;
 
 import com.vintiduo.page.ComponentData;
+import com.vintiduo.page.log.Logger;
 
 public abstract class Page extends Element {
+
+    protected Logger logger = Logger.forClass(getClass());
 
     Layout layout;
 
     public Page() {
         layout = new Layout();
-        addComponent(layout);
+        addElement(layout);
     }
 
     protected Layout getLayout() {

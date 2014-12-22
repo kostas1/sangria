@@ -2,6 +2,10 @@ package com.vintiduo.test;
 
 import com.vintiduo.page.components.*;
 import com.vintiduo.page.PageResource;
+import com.vintiduo.page.components.form.Form;
+import com.vintiduo.page.components.form.FormGroup;
+import com.vintiduo.page.components.form.Label;
+import com.vintiduo.page.components.form.TextField;
 import com.vintiduo.page.events.ClickListener;
 import com.vintiduo.page.events.TableCellClickListener;
 
@@ -20,7 +24,7 @@ public class HomePage extends Page {
             @Override
             protected void onClick() {
                 counter++;
-                System.out.println("KLIK");
+                logger.info("onClick", "KLIK");
                 b.setText("WOOO" + counter);
             }
         });
@@ -31,12 +35,17 @@ public class HomePage extends Page {
         table.addCellClickListener(new TableCellClickListener() {
             @Override
             public void onClick(int row, int column) {
-                System.out.println(String.format("clicked: row: %s, column: %s", row, column));
+                logger.info("onClick", "clicked", "row", row, "column", column);
                 table.addRow(new String[]{"7", "8", "9"});
             }
         });
         getLayout().addElement(table);
         getLayout().addElement(b);
-        getLayout().addElement(new TextWithButton());
+
+        getLayout().addElement(new Form().inside(
+                     new FormGroup(new Label("label1"), new TextField().placeholder("pl1"))
+                .and(new FormGroup(new Label("label2"), new TextField().placeholder("pl2")))
+                .and(new Button("submit"))));
+
     }
 }

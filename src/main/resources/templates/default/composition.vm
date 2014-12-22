@@ -1,0 +1,6 @@
+<div id="$id" class="$class">
+    #foreach ($item in $items)
+        $item
+
+    #end
+</div>

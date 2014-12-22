@@ -5,11 +5,14 @@ import com.vintiduo.page.ComponentData;
 import com.vintiduo.page.FrameworkContext;
 import com.vintiduo.page.events.ClickListener;
 import com.vintiduo.page.events.Listener;
+import com.vintiduo.page.log.Logger;
 import org.apache.commons.lang.RandomStringUtils;
 
 import java.util.*;
 
 public abstract class Element {
+
+    protected Logger logger = Logger.forClass(getClass());
 
     private String                                  id = RandomStringUtils.randomAlphanumeric(16);
     private Set<Element>                            elements = new HashSet<>();
@@ -28,7 +31,8 @@ public abstract class Element {
     }
 
     public void handleEvent(Event event) {
-        System.out.println(event);
+        logger.info("handleEvent", "handling event", "event", event);
+
         Element source = getAllElements().get(event.getSource());
         if (source != null) {
             List<Listener> listenerList = source.getListeners().get(event.getType());
@@ -81,9 +85,12 @@ public abstract class Element {
         return frameworkContext.render(this);
     }
 
-    protected void addComponent(Element element) {
-        element.setFrameworkContext(frameworkContext);
-        elements.add(element);
+    protected Element addElement(Element... elementsToAdd) {
+        for (Element e: elementsToAdd) {
+            e.setFrameworkContext(frameworkContext);
+            elements.add(e);
+        }
+        return this;
     }
 
     public Set<Element> getDirectChildElements() {
